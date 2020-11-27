@@ -2,7 +2,6 @@ import torch
 import torchvision
 from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from engine import train_one_epoch
 
 from FirstDataset import FirstDataset
 
@@ -45,25 +44,27 @@ if __name__ == '__main__':
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.005,
-                                momentum=0.9, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
     # let's train it for 10 epochs
     num_epochs = 10
 
-    for epoch in range(num_epochs):
+    for i, epoch in enumerate(range(num_epochs)):
         # train for one epoch, printing every 10 iterations
         # train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
+        print('epoch ' + str(i + 1) + ':')
         model.train()
         for images, targets in train_loader:
             loss_dict = model(images, targets)
+            print(loss_dict)
             losses = sum(loss for loss in loss_dict.values())
             optimizer.zero_grad()
             losses.backward()
             optimizer.step()
             # update the learning rate
             lr_scheduler.step()
+        print('-' * 30)
         # evaluate on the test dataset
         # evaluate(model, test_loader, device=device)
