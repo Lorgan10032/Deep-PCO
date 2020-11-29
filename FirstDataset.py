@@ -32,7 +32,7 @@ class FirstDataset(Dataset):
 
     def parse_xml(self, annotation):
         root = ET.parse(annotation).getroot()
-        target = {'labels': torch.tensor([0], dtype=torch.int64)}
+        target = {'labels': torch.tensor([1], dtype=torch.int64)}
         bndbox_node = root.find("./object/bndbox")
         box = []
         for i in range(4):
