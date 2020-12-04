@@ -5,7 +5,7 @@ from torch import nn
 from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-from FirstDataset import FirstDataset
+from OD_Dataset import OD_Dataset
 from PIL import Image, ImageDraw
 
 
@@ -43,8 +43,8 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
-    full_dataset = FirstDataset(img_dir='/home/shiyaohu/Data/pco_data/imgs',
-                                annotation_dir='/home/shiyaohu/Data/pco_data/label', transforms=transforms.ToTensor())
+    full_dataset = OD_Dataset(img_dir='/home/shiyaohu/Data/pco_data/imgs',
+                              annotation_dir='/home/shiyaohu/Data/pco_data/label', transforms=transforms.ToTensor())
     train_size = int(0.7 * len(full_dataset))
     test_size = len(full_dataset) - train_size
     train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
@@ -77,13 +77,13 @@ if __name__ == '__main__':
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
+    optimizer = torch.optim.Adam(params, lr=0.002, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
     # optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
     # and a learning rate scheduler
     # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
-    # let's train it for 10 epochs
-    num_epochs = 30
+    # let's train it for 15 epochs
+    num_epochs = 15
 
     for i, epoch in enumerate(range(num_epochs)):
         # train for one epoch, printing every 10 iterations
