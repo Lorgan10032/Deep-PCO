@@ -38,7 +38,6 @@ class OD_Dataset(Dataset):
         for i in range(4):
             box.append(int(bndbox_node[i].text))
         target['boxes'] = torch.tensor([box], dtype=torch.float)
-        # target['boxes'] = [box]
         return target
 
 

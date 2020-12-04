@@ -6,7 +6,7 @@ from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 from OD_Dataset import OD_Dataset
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 
 
 def collate_fn(batch):
@@ -60,6 +60,7 @@ if __name__ == '__main__':
     # freeze all the network except the final layer
     for param in model.parameters():
         param.requires_grad = False
+    # except rpn network
     for param in model.rpn.parameters():
         param.requires_grad = True
     # replace the classifier with a new one, that has num_classes which is user-defined
@@ -70,25 +71,21 @@ if __name__ == '__main__':
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     # move model to the right device
-    # if torch.cuda.device_count() > 1:
-    #     print("Let's use ", torch.cuda.device_count(), "GPUs.")
-    #     model = nn.DataParallel(model)
+    if torch.cuda.device_count() > 1:
+        print("Let's use ", torch.cuda.device_count(), "GPUs.")
+        model = nn.DataParallel(model)
     model = model.to(device)
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.Adam(params, lr=0.002, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)
-    # optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
-    # and a learning rate scheduler
-    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
     # let's train it for 15 epochs
     num_epochs = 15
 
     for i, epoch in enumerate(range(num_epochs)):
-        # train for one epoch, printing every 10 iterations
-        # train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
         print('epoch ' + str(i + 1) + ':')
+        # train the model on train set
         for images, targets in train_loader:
             images = list(img.to(device) for img in images)
             targets_cuda = []
@@ -103,9 +100,8 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             losses.backward()
             optimizer.step()
-            # update the learning rate
-            # lr_scheduler.step()
-            # evaluate on test set
+
+        # evaluate on test set
         with torch.no_grad():
             model.eval()
             count = 0
